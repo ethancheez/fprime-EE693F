@@ -1,14 +1,14 @@
 #include "RH_RF69.h"
 
 #define RFM69_FREQ 915
-#define RFM69_CS   8
-#define RFM69_INT  3
+#define RFM69_CS   10
+#define RFM69_INT  20
 #define RFM69_RST  14
 
-RH_RF69 rfm69;
+RH_RF69 rfm69(RFM69_CS, RFM69_INT);
 elapsedMillis timer;
 uint8_t packet[] = "Haha I am attacking you";
-uint32_t m_interval = 1000; // Interval to send packet in milliseconds
+uint32_t m_interval = 10; // Interval to send packet in milliseconds
 
 // Helper functions
 void radioReset();

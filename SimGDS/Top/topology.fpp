@@ -6,6 +6,7 @@ module SimGDS {
 
     enum Ports_RateGroups {
       rateGroup1
+      rateGroup2
     }
 
     enum Ports_StaticMemory {
@@ -19,27 +20,32 @@ module SimGDS {
     # Instances used in the topology
     # ----------------------------------------------------------------------
 
-    instance commDriver
-    instance eventLogger
-    instance rateDriver
-    instance rateGroup1
-    instance rateGroupDriver
-    instance staticMemory
-    instance textLogger
-    instance timeHandler
+    instance gnd_commDriver
+    instance gnd_eventLogger
+    instance gnd_framer
+    instance gnd_rateDriver
+    instance gnd_rateGroup1
+    instance gnd_rateGroup2
+    instance gnd_rateGroupDriver
+    instance gnd_staticMemory
+    instance gnd_textLogger
+    instance gnd_timeHandler
+    instance gnd_tlmSend
 
-    instance rfm69
-    instance gpioRadioReset
-    instance streamCrossoverUplink
-    instance streamCrossoverDownlink
+    instance gnd_rfm69
+    instance gnd_gpioRadioReset
+    instance gnd_streamCrossoverUplink
+    instance gnd_streamCrossoverDownlink
 
     # ----------------------------------------------------------------------
     # Pattern graph specifiers
     # ----------------------------------------------------------------------
 
-    event connections instance eventLogger
+    event connections instance gnd_eventLogger
 
-    time connections instance timeHandler
+    time connections instance gnd_timeHandler
+
+    telemetry connections instance gnd_tlmSend
 
     # ----------------------------------------------------------------------
     # Direct graph specifiers
@@ -47,37 +53,45 @@ module SimGDS {
 
     connections RateGroups {
       # Block driver
-      rateDriver.CycleOut -> rateGroupDriver.CycleIn
+      gnd_rateDriver.CycleOut -> gnd_rateGroupDriver.CycleIn
 
       # Rate group 1
-      rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup1] -> rateGroup1.CycleIn
-      rateGroup1.RateGroupMemberOut[0] -> commDriver.schedIn
-      rateGroup1.RateGroupMemberOut[1] -> rfm69.run
+      gnd_rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup1] -> gnd_rateGroup1.CycleIn
+      gnd_rateGroup1.RateGroupMemberOut[0] -> gnd_commDriver.schedIn
+      gnd_rateGroup1.RateGroupMemberOut[1] -> gnd_rfm69.run
+
+      gnd_rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup2] -> gnd_rateGroup2.CycleIn
+      gnd_rateGroup2.RateGroupMemberOut[0] -> gnd_tlmSend.Run
     }
 
     connections Comms {
 
-      # Downlink
-      rfm69.allocate -> staticMemory.bufferAllocate[Ports_StaticMemory.downlink]
-      rfm69.comDataOut -> streamCrossoverDownlink.streamIn
-      streamCrossoverDownlink.streamOut -> commDriver.send
-      commDriver.deallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.downlink]
+      gnd_tlmSend.PktSend -> gnd_framer.comIn
 
-      streamCrossoverDownlink.errorDeallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.downlink]
+      gnd_framer.framedAllocate -> gnd_staticMemory.bufferAllocate[Ports_StaticMemory.downlink]
+      gnd_framer.framedOut -> gnd_commDriver.send
+
+      # Downlink
+      gnd_rfm69.allocate -> gnd_staticMemory.bufferAllocate[Ports_StaticMemory.downlink]
+      gnd_rfm69.comDataOut -> gnd_streamCrossoverDownlink.streamIn
+      gnd_streamCrossoverDownlink.streamOut -> gnd_commDriver.send
+      gnd_commDriver.deallocate -> gnd_staticMemory.bufferDeallocate[Ports_StaticMemory.downlink]
+
+      gnd_streamCrossoverDownlink.errorDeallocate -> gnd_staticMemory.bufferDeallocate[Ports_StaticMemory.downlink]
 
       # Uplink
-      commDriver.allocate -> staticMemory.bufferAllocate[Ports_StaticMemory.uplink]
-      commDriver.$recv -> streamCrossoverUplink.streamIn
-      streamCrossoverUplink.streamOut -> rfm69.comDataIn
-      rfm69.deallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.uplink]
+      gnd_commDriver.allocate -> gnd_staticMemory.bufferAllocate[Ports_StaticMemory.uplink]
+      gnd_commDriver.$recv -> gnd_streamCrossoverUplink.streamIn
+      gnd_streamCrossoverUplink.streamOut -> gnd_rfm69.comDataIn
+      gnd_rfm69.deallocate -> gnd_staticMemory.bufferDeallocate[Ports_StaticMemory.uplink]
       
-      streamCrossoverUplink.errorDeallocate -> staticMemory.bufferDeallocate[Ports_StaticMemory.uplink]
+      gnd_streamCrossoverUplink.errorDeallocate -> gnd_staticMemory.bufferDeallocate[Ports_StaticMemory.uplink]
 
     }
 
     connections SimGDS {
       # Add here connections to user-defined components
-      rfm69.gpioReset -> gpioRadioReset.gpioWrite
+      gnd_rfm69.gpioReset -> gnd_gpioRadioReset.gpioWrite
     }
 
   }
