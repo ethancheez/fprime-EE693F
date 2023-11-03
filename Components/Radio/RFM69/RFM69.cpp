@@ -145,7 +145,7 @@ namespace Radio {
       }
 
       rfm69.setFrequency(RFM69_FREQ);
-      rfm69.setTxPower(14, true);
+      rfm69.setTxPower(20, true);
 
       Fw::Success radioSuccess = Fw::Success::SUCCESS;
       if (this->isConnected_comStatus_OutputPort(0)) {
@@ -167,6 +167,7 @@ namespace Radio {
         U16 interval
     )
   {
+    delay(3000);
     this->sendInterval = interval;
     this->numHelloWorldSent = 0;
     this->numHelloWorldToSend = numToSend;

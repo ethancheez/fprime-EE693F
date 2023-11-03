@@ -7,8 +7,8 @@
 
 RH_RF69 rfm69(RFM69_CS, RFM69_INT);
 elapsedMillis timer;
-uint8_t packet[] = "Haha I am attacking you";
-uint32_t m_interval = 10; // Interval to send packet in milliseconds
+uint8_t packet[] = "698HRjSrI6jOZECgIABDRwKXb5JnSNU9sGzK797ogc1k1zEzdeYbcavQSu4B";
+uint32_t m_interval = 5; // Interval to send packet in milliseconds
 
 // Helper functions
 void radioReset();
@@ -25,7 +25,7 @@ void setup() {
   }
 
   rfm69.setFrequency(RFM69_FREQ);
-  rfm69.setTxPower(14, true);
+  rfm69.setTxPower(20, true);
 
   Serial.println("Radio initialized!");
 }
@@ -35,6 +35,7 @@ void loop() {
     rfm69.send(&packet[0], (sizeof(packet) / sizeof(uint8_t)) - 1);
     if(!rfm69.waitPacketSent(500)) {
       Serial.println("Failed to send packet");
+      return;
     }
     timer = 0;
   }
