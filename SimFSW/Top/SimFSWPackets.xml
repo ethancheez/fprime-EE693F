@@ -68,5 +68,7 @@
 
     <ignore>
         <channel name="cmdDisp.CommandErrors"/>
+        <channel name="rfm69.NumHelloWorldReceived"/>
+        <channel name="rfm69.NumHelloWorldSent"/>
     </ignore>
 </packets>

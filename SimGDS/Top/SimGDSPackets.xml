@@ -21,5 +21,7 @@
     <!-- Ignored packets -->
 
     <ignore>
+        <channel name="gnd_rfm69.NumHelloWorldReceived"/>
+        <channel name="gnd_rfm69.NumHelloWorldSent"/>
     </ignore>
 </packets>

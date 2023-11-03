@@ -63,10 +63,41 @@ namespace Radio {
       */
       );
 
+    PRIVATE:
+
+      // ----------------------------------------------------------------------
+      // Command handler implementations
+      // ----------------------------------------------------------------------
+
+      //! Implementation for SEND_HELLO_WORLD command handler
+      //! 
+      void SEND_HELLO_WORLD_cmdHandler(
+          const FwOpcodeType opCode, /*!< The opcode*/
+          const U32 cmdSeq, /*!< The command sequence number*/
+          U16 numToSend, 
+          U16 interval 
+      );
+
+      //! Implementation for RESET_HELLO_WORLD_TLM command handler
+      //! 
+      void RESET_HELLO_WORLD_TLM_cmdHandler(
+          const FwOpcodeType opCode, /*!< The opcode*/
+          const U32 cmdSeq /*!< The command sequence number*/
+      );
+
+      void sendHelloWorld();
+
       RH_RF69 rfm69;
       Fw::On radio_state;
       U16 pkt_rx_count;
       U16 pkt_tx_count;
+
+      elapsedMillis sendIntervalTimer;
+      U16 sendInterval;
+      U16 numHelloWorldRX;
+      U16 numHelloWorldSent;
+      U16 numHelloWorldToSend;
+      bool sendHelloWorldPkts;
     };
 
 } // end namespace Radio

@@ -69,9 +69,9 @@ module SimFSW {
 
       # Rate group 2
       rateGroupDriver.CycleOut[Ports_RateGroups.rateGroup2] -> rateGroup2.CycleIn
-      rateGroup2.RateGroupMemberOut[0] -> systemResources.run
-      rateGroup2.RateGroupMemberOut[1] -> tlmSend.Run
-      rateGroup2.RateGroupMemberOut[2] -> bufferManager.schedIn
+      # rateGroup2.RateGroupMemberOut[0] -> systemResources.run
+      rateGroup2.RateGroupMemberOut[0] -> tlmSend.Run
+      rateGroup2.RateGroupMemberOut[1] -> bufferManager.schedIn
     }
 
     connections FaultProtection {
