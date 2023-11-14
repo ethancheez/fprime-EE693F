@@ -146,6 +146,9 @@ namespace Radio {
 
       rfm69.setFrequency(RFM69_FREQ);
       rfm69.setTxPower(20, true);
+      rfm69.setPreambleLength(16);
+      // U8 key[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+      // rfm69.setEncryptionKey(key);
 
       Fw::Success radioSuccess = Fw::Success::SUCCESS;
       if (this->isConnected_comStatus_OutputPort(0)) {
