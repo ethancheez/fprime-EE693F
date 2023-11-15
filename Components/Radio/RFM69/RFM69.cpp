@@ -146,7 +146,9 @@ namespace Radio {
 
       rfm69.setFrequency(RFM69_FREQ);
       rfm69.setTxPower(20, true);
-      rfm69.setPreambleLength(16);
+      // rfm69.setPreambleLength(16);
+      // U8 syncWord[] = { 0x12, 0x34, 0x56, 0x78 };
+      // rfm69.setSyncWords(syncWord, sizeof(syncWord));
       // U8 key[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
       // rfm69.setEncryptionKey(key);
 
