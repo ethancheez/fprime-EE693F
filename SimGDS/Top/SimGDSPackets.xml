@@ -3,20 +3,25 @@
     <import_topology>SimGDS/Top/SimGDSTopologyAppAi.xml</import_topology>
 
     <packet name="CDH" id="1" level="1">
-        <channel name="rateGroup1.MaxCycleTime"/>
-        <channel name="rateGroup1.CycleTime"/>
-        <channel name="rateGroup1.CycleCount"/>
+        <channel name="gnd_rateGroup1.MaxCycleTime"/>
+        <channel name="gnd_rateGroup1.CycleTime"/>
+        <channel name="gnd_rateGroup1.CycleCount"/>
+        <channel name="gnd_rateGroup2.MaxCycleTime"/>
+        <channel name="gnd_rateGroup2.CycleTime"/>
+        <channel name="gnd_rateGroup2.CycleCount"/>
     </packet>
 
     <packet name="Radio" id="8" level="1">
-        <channel name="rfm69.Status"/>
-        <channel name="rfm69.NumPacketsSent"/>
-        <channel name="rfm69.NumPacketsReceived"/>
-        <channel name="rfm69.RSSI"/>
+        <channel name="gnd_rfm69.Status"/>
+        <channel name="gnd_rfm69.NumPacketsSent"/>
+        <channel name="gnd_rfm69.NumPacketsReceived"/>
+        <channel name="gnd_rfm69.RSSI"/>
     </packet>
 
     <!-- Ignored packets -->
 
     <ignore>
+        <channel name="gnd_rfm69.NumHelloWorldReceived"/>
+        <channel name="gnd_rfm69.NumHelloWorldSent"/>
     </ignore>
 </packets>

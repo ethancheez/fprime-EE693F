@@ -20,7 +20,11 @@ namespace Radio {
         rfm69(RFM69_CS, RFM69_INT),
         radio_state(Fw::On::OFF),
         pkt_rx_count(0),
-        pkt_tx_count(0)
+        pkt_tx_count(0),
+        numHelloWorldRX(0),
+        numHelloWorldSent(0),
+        numHelloWorldToSend(0),
+        sendHelloWorldPkts(false)
   {
     
   }
@@ -75,6 +79,13 @@ namespace Radio {
       U8 bytes_recv = RH_RF69_MAX_MESSAGE_LEN;
 
       if (rfm69.recv(buf, &bytes_recv)) {
+
+        String bufString(reinterpret_cast<CHAR*>(buf));
+        if (bufString.indexOf("Hello World") >= 0) {
+          this->numHelloWorldRX++;
+          return;
+        }
+
         Fw::Buffer recvBuffer = this->allocate_out(0, bytes_recv);
         memcpy(recvBuffer.getData(), buf, bytes_recv);
         recvBuffer.setSize(bytes_recv);
@@ -84,6 +95,7 @@ namespace Radio {
 
         this->tlmWrite_NumPacketsReceived(pkt_rx_count);
         this->tlmWrite_RSSI(rfm69.lastRssi());
+        this->tlmWrite_NumHelloWorldReceived(numHelloWorldRX);
 
         this->comDataOut_out(0, recvBuffer, Drv::RecvStatus::RECV_OK);
       }
@@ -133,7 +145,12 @@ namespace Radio {
       }
 
       rfm69.setFrequency(RFM69_FREQ);
-      rfm69.setTxPower(14, true);
+      rfm69.setTxPower(20, true);
+      // rfm69.setPreambleLength(16);
+      // U8 syncWord[] = { 0x12, 0x34, 0x56, 0x78 };
+      // rfm69.setSyncWords(syncWord, sizeof(syncWord));
+      // U8 key[16] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+      // rfm69.setEncryptionKey(key);
 
       Fw::Success radioSuccess = Fw::Success::SUCCESS;
       if (this->isConnected_comStatus_OutputPort(0)) {
@@ -144,6 +161,55 @@ namespace Radio {
     }
     
     this->recv();
+    this->sendHelloWorld();
+  }
+
+  void RFM69 ::
+    SEND_HELLO_WORLD_cmdHandler(
+        const FwOpcodeType opCode,
+        const U32 cmdSeq,
+        U16 numToSend,
+        U16 interval
+    )
+  {
+    delay(3000);
+    this->sendInterval = interval;
+    this->numHelloWorldSent = 0;
+    this->numHelloWorldToSend = numToSend;
+    this->sendHelloWorldPkts = true;
+    this->cmdResponse_out(opCode,cmdSeq,Fw::CmdResponse::OK);
+  }
+
+  void RFM69 ::
+    RESET_HELLO_WORLD_TLM_cmdHandler(
+        const FwOpcodeType opCode,
+        const U32 cmdSeq
+    )
+  {
+    this->numHelloWorldRX = 0;
+    this->cmdResponse_out(opCode,cmdSeq,Fw::CmdResponse::OK);
+  }
+
+  void RFM69::sendHelloWorld() {
+    this->tlmWrite_NumHelloWorldSent(numHelloWorldSent);
+
+    if (!sendHelloWorldPkts) {
+      return;
+    }
+
+    if (this->numHelloWorldSent >= this->numHelloWorldToSend) {
+      this->sendHelloWorldPkts = false;
+      return;
+    }
+
+    if (this->sendIntervalTimer < this->sendInterval) {
+      return;
+    }
+
+    U8 helloWorld[] = "Hello World";
+    rfm69.send(helloWorld, sizeof(helloWorld));
+    this->numHelloWorldSent++;
+    this->sendIntervalTimer = 0;
   }
 
 } // end namespace Radio

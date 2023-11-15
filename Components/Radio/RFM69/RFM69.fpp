@@ -2,6 +2,10 @@ module Radio {
     @ Example radio component using the RFM69HCW radio
     passive component RFM69 {
 
+        sync command SEND_HELLO_WORLD(numToSend: U16, interval: U16)
+
+        sync command RESET_HELLO_WORLD_TLM()
+
         # ----------------------------------------------------------------------
         # Framer, deframer, and queue ports
         # ----------------------------------------------------------------------
@@ -41,6 +45,12 @@ module Radio {
         @ Telemetry channel for radio RSSI
         telemetry RSSI: I16
 
+        @ Telemetry for Hello World packet
+        telemetry NumHelloWorldReceived: U16
+
+        @ Telemetry for Hello World packet
+        telemetry NumHelloWorldSent: U16
+
         @ Prints received packet payload
         event PayloadMessageTX(msg: U32) \
             severity diagnostic \
@@ -66,6 +76,15 @@ module Radio {
         ###############################################################################
         @ Port for requesting the current time
         time get port timeCaller
+
+        @ Port for sending command registrations
+        command reg port cmdRegOut
+
+        @ Port for receiving commands
+        command recv port cmdIn
+
+        @ Port for sending command responses
+        command resp port cmdResponseOut
 
         @ Port for sending textual representation of events
         text event port logTextOut

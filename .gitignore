@@ -4,6 +4,7 @@ cmake-build-*
 build-artifacts/
 build-fprime-*
 *-template
+dictionary.xml
 
 # Misc
 /venv/

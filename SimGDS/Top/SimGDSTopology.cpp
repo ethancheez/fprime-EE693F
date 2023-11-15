@@ -17,16 +17,21 @@
 // Allows easy reference to objects in FPP/autocoder required namespaces
 using namespace SimGDS;
 
+// The reference topology uses the F´ packet protocol when communicating with the ground and therefore uses the F´
+// framing and deframing implementations.
+Svc::FprimeFraming framing;
+
 // The reference topology uses a malloc-based allocator for components that need to allocate memory during the
 // initialization phase.
 Fw::MallocAllocator mallocator;
 
 // The reference topology divides the incoming clock signal (1Hz) into sub-signals: 1/100Hz, 1/200Hz, and 1/1000Hz
-NATIVE_INT_TYPE rateGroupDivisors[Svc::RateGroupDriver::DIVIDER_SIZE] = {1};
+NATIVE_INT_TYPE rateGroupDivisors[Svc::RateGroupDriver::DIVIDER_SIZE] = {1, 1000};
 
 // Rate groups may supply a context token to each of the attached children whose purpose is set by the project. The
 // reference topology sets each token to zero as these contexts are unused in this project.
 NATIVE_INT_TYPE rateGroup1Context[FppConstant_PassiveRateGroupOutputPorts::PassiveRateGroupOutputPorts] = {};
+NATIVE_INT_TYPE rateGroup2Context[FppConstant_PassiveRateGroupOutputPorts::PassiveRateGroupOutputPorts] = {};
 
 /**
  * \brief configure/setup components in project-specific way
@@ -37,10 +42,14 @@ NATIVE_INT_TYPE rateGroup1Context[FppConstant_PassiveRateGroupOutputPorts::Passi
  */
 void configureTopology() {
     // Rate group driver needs a divisor list
-    rateGroupDriver.configure(rateGroupDivisors, FW_NUM_ARRAY_ELEMENTS(rateGroupDivisors));
+    gnd_rateGroupDriver.configure(rateGroupDivisors, FW_NUM_ARRAY_ELEMENTS(rateGroupDivisors));
 
     // Rate groups require context arrays.
-    rateGroup1.configure(rateGroup1Context, FW_NUM_ARRAY_ELEMENTS(rateGroup1Context));
+    gnd_rateGroup1.configure(rateGroup1Context, FW_NUM_ARRAY_ELEMENTS(rateGroup1Context));
+    gnd_rateGroup2.configure(rateGroup2Context, FW_NUM_ARRAY_ELEMENTS(rateGroup2Context));
+
+    // Framer and Deframer components need to be passed a protocol handler
+    gnd_framer.setup(framing);
 }
 
 // Public functions for use in main program are namespaced with deployment name SimGDS
@@ -62,11 +71,11 @@ void setupTopology(const TopologyState& state) {
     startTasks(state);
 
     // Configure GPIO pins
-    gpioRadioReset.open(Radio::RFM69::RFM69_RST, Arduino::GpioDriver::GpioDirection::OUT);
+    gnd_gpioRadioReset.open(Radio::RFM69::RFM69_RST, Arduino::GpioDriver::GpioDirection::OUT);
     
-    rateDriver.configure(1);
-    commDriver.configure(&Serial);
-    rateDriver.start();
+    gnd_rateDriver.configure(1);
+    gnd_commDriver.configure(&Serial);
+    gnd_rateDriver.start();
 }
 
 void teardownTopology(const TopologyState& state) {
