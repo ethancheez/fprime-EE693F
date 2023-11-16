@@ -6,6 +6,7 @@
 
 #include <Components/Radio/RFM69/RFM69.hpp>
 #include <FpConfig.hpp>
+#include <Os/Log.hpp>
 
 namespace Radio {
 
@@ -208,6 +209,8 @@ namespace Radio {
 
     U8 helloWorld[] = "Hello World";
     rfm69.send(helloWorld, sizeof(helloWorld));
+
+    Fw::Logger::logMsg("[%d] Sending Hello World...\n", this->numHelloWorldSent);
     this->numHelloWorldSent++;
     this->sendIntervalTimer = 0;
   }
